@@ -1,16 +1,17 @@
-# chwamigue
+# Chwamigue
 
-A new Flutter project.
+App estilo Chwazi desarrollada en Flutter. Permite seleccionar animaciones y elegir al azar uno o más dedos entre múltiples toques simultáneos.
 
-## Getting Started
+## Características
 
-This project is a starting point for a Flutter application.
+- Detección de multitouch
+- Selección aleatoria de dedos
+- Animaciones personalizadas (rebote, agrandar, etc.)
+- Preparado para agregar efectos como brillo y partículas
 
-A few resources to get you started if this is your first Flutter project:
+## Instalación
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+flutter pub get
+flutter run
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.

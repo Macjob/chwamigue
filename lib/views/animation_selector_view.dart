@@ -15,14 +15,24 @@ class _AnimationSelectorState extends State<AnimationSelector> {
   Map<int, TouchCircle> activeTouches = {};
   bool showFixedCircle = false;
   Timer? _selectionTimer;
+  TouchCircle? _winner;
+  bool _showWinner = false;
+  Color _backgroundColor = Colors.white;
 
   void _handleTouch(PointerEvent event, {bool isUp = false}) {
+    if (_showWinner && event is PointerDownEvent) {
+      setState(() {
+        _showWinner = false;
+        _backgroundColor = Colors.white;
+        activeTouches.clear();
+        _winner = null;
+      });
+    }
+
     if (event is PointerDownEvent || event is PointerMoveEvent) {
       setState(() {
         activeTouches[event.pointer] = TouchCircle(
           pointerId: event.pointer,
-          // Use the event's local position so the circle appears
-          // correctly relative to the listener's area.
           position: event.localPosition,
           color: Colors.primaries[event.pointer % Colors.primaries.length],
         );
@@ -52,15 +62,18 @@ class _AnimationSelectorState extends State<AnimationSelector> {
     if (activeTouches.isEmpty) return;
     final list = activeTouches.values.toList();
     final winner = (list..shuffle()).first;
-    // podrías usar una lista para múltiples ganadores
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("¡Seleccionado!"),
-        content: Text("Ganador chwazii: dedo ${winner.pointerId}"),
-      ),
-    );
+    setState(() {
+      _winner = TouchCircle(
+        pointerId: winner.pointerId,
+        position: winner.position,
+        color: winner.color,
+      );
+      activeTouches = {winner.pointerId: _winner!};
+      _backgroundColor = Colors.lightGreen.shade200;
+      _showWinner = true;
+      _selectionTimer = null;
+    });
   }
 
   @override
@@ -86,23 +99,29 @@ class _AnimationSelectorState extends State<AnimationSelector> {
               onPointerDown: _handleTouch,
               onPointerMove: _handleTouch,
               onPointerUp: (e) => _handleTouch(e, isUp: true),
-              child: Stack(
-                children: activeTouches.values
-                    .map((touch) => AnimatedCircle(
-                          position: touch.position,
-                          color: touch.color,
-                          animationType: selectedAnimation,
-                        ))
-                    .toList(),
-                if (showFixedCircle)
-                  AnimatedCircle(
-                    position: Offset(
-                      MediaQuery.of(context).size.width / 2,
-                      MediaQuery.of(context).size.height / 2,
+              child: Container(
+                color: _backgroundColor,
+                child: Stack(
+                  children: [
+                    ...activeTouches.values.map(
+                      (touch) => AnimatedCircle(
+                        key: touch.key,
+                        position: touch.position,
+                        color: touch.color,
+                        animationType: selectedAnimation,
+                      ),
                     ),
-                    color: Colors.grey.withOpacity(0.3),
-                    animationType: selectedAnimation,
-                  ),
+                    if (showFixedCircle)
+                      AnimatedCircle(
+                        position: Offset(
+                          MediaQuery.of(context).size.width / 2,
+                          MediaQuery.of(context).size.height / 2,
+                        ),
+                        color: Colors.grey.withOpacity(0.3),
+                        animationType: selectedAnimation,
+                      ),
+                  ],
+                ),
               ),
             ),
           )

@@ -35,3 +35,5 @@ Thumbs.db
 # Others
 *.lock
 *.log
+flutter/
+*.tar.xz

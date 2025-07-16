@@ -8,6 +8,7 @@ App estilo Chwazi desarrollada en Flutter. Permite seleccionar animaciones y ele
 - Selección aleatoria de dedos
 - Animaciones personalizadas (rebote, agrandar, etc.)
 - Preparado para agregar efectos como brillo y partículas
+- Opción "Mostrar círculo fijo" para probar animaciones
 
 ## Instalación
 
@@ -15,3 +16,4 @@ App estilo Chwazi desarrollada en Flutter. Permite seleccionar animaciones y ele
 flutter pub get
 flutter run
 
+```

@@ -45,17 +45,21 @@ class _AnimatedCircleState extends State<AnimatedCircle> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: widget.position.dx - 25,
-      top: widget.position.dy - 25,
+      left: widget.position.dx - 40,
+      top: widget.position.dy - 40,
       child: AnimatedBuilder(
         animation: _animation,
         builder: (context, child) {
           return Transform.scale(
             scale: _animation.value,
             child: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: widget.color,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.black, width: 3),
+              ),
             ),
           );
         },

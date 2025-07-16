@@ -12,13 +12,15 @@ class AnimationSelector extends StatefulWidget {
 class _AnimationSelectorState extends State<AnimationSelector> {
   AnimationOption selectedAnimation = AnimationOption.scale;
   Map<int, TouchCircle> activeTouches = {};
+  bool showFixedCircle = false; // NUEVA VARIABLE
 
   void _handleTouch(PointerEvent event, {bool isUp = false}) {
+    print('TOUCH: ${event.position}');
     if (event is PointerDownEvent || event is PointerMoveEvent) {
       setState(() {
         activeTouches[event.pointer] = TouchCircle(
           pointerId: event.pointer,
-          position: event.position,
+          position: event.localPosition,
           color: Colors.primaries[event.pointer % Colors.primaries.length],
         );
       });
@@ -53,31 +55,65 @@ class _AnimationSelectorState extends State<AnimationSelector> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Selector de animación')),
-      body: Column(
+      body: Stack(
         children: [
-          DropdownButton<AnimationOption>(
-            value: selectedAnimation,
-            onChanged: (value) => setState(() => selectedAnimation = value!),
-            items: AnimationOption.values
-                .map((e) => DropdownMenuItem(value: e, child: Text(e.displayName)))
-                .toList(),
-          ),
-          Expanded(
-            child: Listener(
-              onPointerDown: _handleTouch,
-              onPointerMove: _handleTouch,
-              onPointerUp: (e) => _handleTouch(e, isUp: true),
+          // Listener ocupa toda la pantalla
+          Listener(
+            onPointerDown: _handleTouch,
+            onPointerMove: _handleTouch,
+            onPointerUp: (e) => _handleTouch(e, isUp: true),
+            child: Container(
+              color: Colors.transparent, // Asegura que reciba eventos
+              width: double.infinity,
+              height: double.infinity,
               child: Stack(
-                children: activeTouches.values
-                    .map((touch) => AnimatedCircle(
-                          position: touch.position,
-                          color: touch.color,
-                          animationType: selectedAnimation,
-                        ))
-                    .toList(),
+                children: [
+                  if (showFixedCircle)
+                    AnimatedCircle(
+                      position: const Offset(200, 400),
+                      color: Colors.red,
+                      animationType: selectedAnimation,
+                    ),
+                  ...activeTouches.values
+                      .map((touch) => AnimatedCircle(
+                            position: touch.position,
+                            color: touch.color,
+                            animationType: selectedAnimation,
+                          ))
+                      .toList(),
+                ],
               ),
             ),
-          )
+          ),
+          // Menú desplegable arriba a la izquierda
+          Positioned(
+            top: 16,
+            left: 16,
+            child: DropdownButton<String>(
+              value: showFixedCircle ? 'fixed' : selectedAnimation.name,
+              onChanged: (value) {
+                setState(() {
+                  if (value == 'fixed') {
+                    showFixedCircle = true;
+                  } else {
+                    showFixedCircle = false;
+                    selectedAnimation = AnimationOption.values.firstWhere((e) => e.name == value);
+                  }
+                });
+              },
+              items: [
+                ...AnimationOption.values
+                    .map((e) => DropdownMenuItem(
+                          value: e.name,
+                          child: Text(e.displayName),
+                        )),
+                const DropdownMenuItem(
+                  value: 'fixed',
+                  child: Text('Mostrar círculo fijon'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -15,6 +15,8 @@ class _AnimationSelectorState extends State<AnimationSelector> {
   Map<int, TouchCircle> activeTouches = {};
   bool showFixedCircle = false;
   Timer? _selectionTimer;
+
+  // Nuevas variables para lógica de ganador
   TouchCircle? _winner;
   bool _showWinner = false;
   Color _backgroundColor = Colors.white;
@@ -80,51 +82,69 @@ class _AnimationSelectorState extends State<AnimationSelector> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Selector de animación')),
-      body: Column(
+      body: Stack(
         children: [
-          DropdownButton<AnimationOption>(
-            value: selectedAnimation,
-            onChanged: (value) => setState(() => selectedAnimation = value!),
-            items: AnimationOption.values
-                .map((e) => DropdownMenuItem(value: e, child: Text(e.displayName)))
-                .toList(),
-          ),
-          SwitchListTile(
-            title: const Text('Mostrar círculo fijo'),
-            value: showFixedCircle,
-            onChanged: (value) => setState(() => showFixedCircle = value),
-          ),
-          Expanded(
-            child: Listener(
-              onPointerDown: _handleTouch,
-              onPointerMove: _handleTouch,
-              onPointerUp: (e) => _handleTouch(e, isUp: true),
-              child: Container(
-                color: _backgroundColor,
-                child: Stack(
-                  children: [
-                    ...activeTouches.values.map(
-                      (touch) => AnimatedCircle(
-                        key: touch.key,
-                        position: touch.position,
-                        color: touch.color,
-                        animationType: selectedAnimation,
+          Listener(
+            onPointerDown: _handleTouch,
+            onPointerMove: _handleTouch,
+            onPointerUp: (e) => _handleTouch(e, isUp: true),
+            child: Container(
+              color: _backgroundColor,
+              width: double.infinity,
+              height: double.infinity,
+              child: Stack(
+                children: [
+                  if (showFixedCircle)
+                    AnimatedCircle(
+                      position: Offset(
+                        MediaQuery.of(context).size.width / 2,
+                        MediaQuery.of(context).size.height / 2,
                       ),
+                      color: Colors.grey.withOpacity(0.3),
+                      animationType: selectedAnimation,
                     ),
-                    if (showFixedCircle)
-                      AnimatedCircle(
-                        position: Offset(
-                          MediaQuery.of(context).size.width / 2,
-                          MediaQuery.of(context).size.height / 2,
-                        ),
-                        color: Colors.grey.withOpacity(0.3),
-                        animationType: selectedAnimation,
-                      ),
-                  ],
-                ),
+                  ...activeTouches.values.map(
+                    (touch) => AnimatedCircle(
+                      key: touch.key,
+                      position: touch.position,
+                      color: touch.color,
+                      animationType: selectedAnimation,
+                    ),
+                  ),
+                ],
               ),
             ),
-          )
+          ),
+          // Menú desplegable arriba a la izquierda
+          Positioned(
+            top: 16,
+            left: 16,
+            child: DropdownButton<String>(
+              value: showFixedCircle ? 'fixed' : selectedAnimation.name,
+              onChanged: (value) {
+                setState(() {
+                  if (value == 'fixed') {
+                    showFixedCircle = true;
+                  } else {
+                    showFixedCircle = false;
+                    selectedAnimation = AnimationOption.values
+                        .firstWhere((e) => e.name == value);
+                  }
+                });
+              },
+              items: [
+                ...AnimationOption.values
+                    .map((e) => DropdownMenuItem(
+                          value: e.name,
+                          child: Text(e.displayName),
+                        )),
+                const DropdownMenuItem(
+                  value: 'fixed',
+                  child: Text('Mostrar círculo fijo'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

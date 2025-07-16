@@ -45,18 +45,22 @@ class _AnimatedCircleState extends State<AnimatedCircle> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: widget.position.dx - 25,
-      top: widget.position.dy - 25,
-      child: IgnorePointer(
+      left: widget.position.dx - 40,
+      top: widget.position.dy - 40,
+      child: IgnorePointer( // para no interferir con gestos táctiles
         child: AnimatedBuilder(
           animation: _animation,
           builder: (context, child) {
-            return Container(
-              width: 50 * _animation.value,
-              height: 50 * _animation.value,
-              decoration: BoxDecoration(
-                color: widget.color.withOpacity(0.7),
-                shape: BoxShape.circle,
+            return Transform.scale(
+              scale: _animation.value,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: widget.color.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.black, width: 3),
+                ),
               ),
             );
           },
@@ -64,53 +68,4 @@ class _AnimatedCircleState extends State<AnimatedCircle> with SingleTickerProvid
       ),
     );
   }
-}
-
-class AnimationScreen extends StatelessWidget {
-  final Map<int, TouchData> activeTouches;
-  final AnimationOption selectedAnimation;
-
-  const AnimationScreen({
-    super.key,
-    required this.activeTouches,
-    required this.selectedAnimation,
-  });
-
-  void _handleTouch(PointerEvent event, {bool isUp = false}) {
-    print('Touch: ${event.position}');
-    // Handle touch events
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Listener(
-        onPointerDown: _handleTouch,
-        onPointerMove: _handleTouch,
-        onPointerUp: (e) => _handleTouch(e, isUp: true),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            ...activeTouches.values
-                .map((touch) => AnimatedCircle(
-                      position: touch.position,
-                      color: Colors.red,
-                      animationType: selectedAnimation,
-                    ))
-                ,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class TouchData {
-  final Offset position;
-  final Color color;
-
-  TouchData({
-    required this.position,
-    required this.color,
-  });
 }

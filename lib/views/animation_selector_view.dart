@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../models/animation_option.dart';
 import '../widgets/animated_circle.dart';
 import '../utils/touch_manager.dart';
@@ -13,6 +14,7 @@ class _AnimationSelectorState extends State<AnimationSelector> {
   AnimationOption selectedAnimation = AnimationOption.scale;
   Map<int, TouchCircle> activeTouches = {};
   bool showFixedCircle = false; // NUEVA VARIABLE
+  Timer? _selectionTimer;
 
   void _handleTouch(PointerEvent event, {bool isUp = false}) {
     print('TOUCH: ${event.position}');
@@ -24,14 +26,23 @@ class _AnimationSelectorState extends State<AnimationSelector> {
           color: Colors.primaries[event.pointer % Colors.primaries.length],
         );
       });
+
+      if (event is PointerDownEvent) {
+        _selectionTimer?.cancel();
+        _selectionTimer = Timer(const Duration(seconds: 5), () {
+          if (mounted && activeTouches.isNotEmpty) {
+            _selectRandomFinger();
+          }
+        });
+      }
     } else if (isUp) {
       setState(() {
         activeTouches.remove(event.pointer);
       });
 
       if (activeTouches.isEmpty) {
-        // Al soltar todos los dedos: seleccionar uno o más
-        _selectRandomFinger(); 
+        _selectionTimer?.cancel();
+        _selectionTimer = null;
       }
     }
   }
@@ -40,13 +51,12 @@ class _AnimationSelectorState extends State<AnimationSelector> {
     if (activeTouches.isEmpty) return;
     final list = activeTouches.values.toList();
     final winner = (list..shuffle()).first;
-    // podrías usar una lista para múltiples ganadores
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("¡Seleccionado!"),
-        content: Text("Ganador: ${winner.pointerId}"),
+        content: Text("Ganador chwazii: dedo ${winner.pointerId}"),
       ),
     );
   }
@@ -57,21 +67,23 @@ class _AnimationSelectorState extends State<AnimationSelector> {
       appBar: AppBar(title: const Text('Selector de animación')),
       body: Stack(
         children: [
-          // Listener ocupa toda la pantalla
           Listener(
             onPointerDown: _handleTouch,
             onPointerMove: _handleTouch,
             onPointerUp: (e) => _handleTouch(e, isUp: true),
             child: Container(
-              color: Colors.transparent, // Asegura que reciba eventos
+              color: Colors.transparent,
               width: double.infinity,
               height: double.infinity,
               child: Stack(
                 children: [
                   if (showFixedCircle)
                     AnimatedCircle(
-                      position: const Offset(200, 400),
-                      color: Colors.red,
+                      position: Offset(
+                        MediaQuery.of(context).size.width / 2,
+                        MediaQuery.of(context).size.height / 2,
+                      ),
+                      color: Colors.grey.withOpacity(0.3),
                       animationType: selectedAnimation,
                     ),
                   ...activeTouches.values
@@ -97,7 +109,8 @@ class _AnimationSelectorState extends State<AnimationSelector> {
                     showFixedCircle = true;
                   } else {
                     showFixedCircle = false;
-                    selectedAnimation = AnimationOption.values.firstWhere((e) => e.name == value);
+                    selectedAnimation = AnimationOption.values
+                        .firstWhere((e) => e.name == value);
                   }
                 });
               },
@@ -109,7 +122,7 @@ class _AnimationSelectorState extends State<AnimationSelector> {
                         )),
                 const DropdownMenuItem(
                   value: 'fixed',
-                  child: Text('Mostrar círculo fijon'),
+                  child: Text('Mostrar círculo fijo'),
                 ),
               ],
             ),

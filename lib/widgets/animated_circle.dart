@@ -47,7 +47,7 @@ class _AnimatedCircleState extends State<AnimatedCircle> with SingleTickerProvid
     return Positioned(
       left: widget.position.dx - 40,
       top: widget.position.dy - 40,
-      child: IgnorePointer( // para no interferir con gestos táctiles
+      child: IgnorePointer( // evita capturar eventos de toque
         child: AnimatedBuilder(
           animation: _animation,
           builder: (context, child) {

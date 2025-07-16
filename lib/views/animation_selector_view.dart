@@ -13,11 +13,24 @@ class AnimationSelector extends StatefulWidget {
 class _AnimationSelectorState extends State<AnimationSelector> {
   AnimationOption selectedAnimation = AnimationOption.scale;
   Map<int, TouchCircle> activeTouches = {};
-  bool showFixedCircle = false; // NUEVA VARIABLE
+  bool showFixedCircle = false;
   Timer? _selectionTimer;
 
+  // Nuevas variables para lógica de ganador
+  TouchCircle? _winner;
+  bool _showWinner = false;
+  Color _backgroundColor = Colors.white;
+
   void _handleTouch(PointerEvent event, {bool isUp = false}) {
-    print('TOUCH: ${event.position}');
+    if (_showWinner && event is PointerDownEvent) {
+      setState(() {
+        _showWinner = false;
+        _backgroundColor = Colors.white;
+        activeTouches.clear();
+        _winner = null;
+      });
+    }
+
     if (event is PointerDownEvent || event is PointerMoveEvent) {
       setState(() {
         activeTouches[event.pointer] = TouchCircle(
@@ -52,13 +65,17 @@ class _AnimationSelectorState extends State<AnimationSelector> {
     final list = activeTouches.values.toList();
     final winner = (list..shuffle()).first;
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("¡Seleccionado!"),
-        content: Text("Ganador chwazii: dedo ${winner.pointerId}"),
-      ),
-    );
+    setState(() {
+      _winner = TouchCircle(
+        pointerId: winner.pointerId,
+        position: winner.position,
+        color: winner.color,
+      );
+      activeTouches = {winner.pointerId: _winner!};
+      _backgroundColor = Colors.lightGreen.shade200;
+      _showWinner = true;
+      _selectionTimer = null;
+    });
   }
 
   @override
@@ -72,7 +89,7 @@ class _AnimationSelectorState extends State<AnimationSelector> {
             onPointerMove: _handleTouch,
             onPointerUp: (e) => _handleTouch(e, isUp: true),
             child: Container(
-              color: Colors.transparent,
+              color: _backgroundColor,
               width: double.infinity,
               height: double.infinity,
               child: Stack(
@@ -86,13 +103,14 @@ class _AnimationSelectorState extends State<AnimationSelector> {
                       color: Colors.grey.withOpacity(0.3),
                       animationType: selectedAnimation,
                     ),
-                  ...activeTouches.values
-                      .map((touch) => AnimatedCircle(
-                            position: touch.position,
-                            color: touch.color,
-                            animationType: selectedAnimation,
-                          ))
-                      .toList(),
+                  ...activeTouches.values.map(
+                    (touch) => AnimatedCircle(
+                      key: touch.key,
+                      position: touch.position,
+                      color: touch.color,
+                      animationType: selectedAnimation,
+                    ),
+                  ),
                 ],
               ),
             ),

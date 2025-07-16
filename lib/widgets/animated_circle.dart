@@ -20,7 +20,7 @@ class AnimatedCircle extends StatefulWidget {
 class _AnimatedCircleState extends State<AnimatedCircle> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  bool _hasAnimated = false;
+  final bool _hasAnimated = false;
 
   @override
   void initState() {
@@ -47,22 +47,24 @@ class _AnimatedCircleState extends State<AnimatedCircle> with SingleTickerProvid
     return Positioned(
       left: widget.position.dx - 40,
       top: widget.position.dy - 40,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _animation.value,
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: widget.color,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.black, width: 3),
+      child: IgnorePointer( // para no interferir con gestos táctiles
+        child: AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _animation.value,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: widget.color.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.black, width: 3),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

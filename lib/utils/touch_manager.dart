@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/animation_option.dart';
 
 class TouchCircle {
   final int pointerId;

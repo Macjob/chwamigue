@@ -18,7 +18,9 @@ class _AnimationSelectorState extends State<AnimationSelector> {
       setState(() {
         activeTouches[event.pointer] = TouchCircle(
           pointerId: event.pointer,
-          position: event.position,
+          // Use the event's local position so the circle appears
+          // correctly relative to the listener's area.
+          position: event.localPosition,
           color: Colors.primaries[event.pointer % Colors.primaries.length],
         );
       });

@@ -15,3 +15,4 @@ App estilo Chwazi desarrollada en Flutter. Permite seleccionar animaciones y ele
 flutter pub get
 flutter run
 
+```
